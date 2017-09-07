@@ -7,6 +7,7 @@
 
 1. morpheme : koNLPy 를 이용한 형태소 분석 사용법 익히기
  - 목적 한글 문장을 입력받아 형태소를 분석하기 위한 koNLPy 사용법을 익히기 위한 프로젝트
+ - Komoran, Kkma, Twitter, Hannanum 클래스의 사용 예를 작성
 
 A. vscode 환경에서 작업
  1) vscode 내부에서 python 버전을 선택하기 위해서는 아래의 작업을 수행해야 함.
