@@ -1,34 +1,61 @@
 from operator import eq
+import re
+import os
 
 class ssparser:
     def __init__(self):
+        self.filePath = ''
         self.prepareData = []
         self.categoryArray = []
         self.xData = []
         self.yData = []
+        self.dummyYData = []
         self.isDebug = False
 
+    def loadDummyData (self):
+        # TODO: 이전에 기록되어있던 yData 를 가져와 순차적으로 추가.
+        currentPath = os.getcwd()
 
-    def setString (self, string):
-        self.originString = string.lower()
-        self.prepareData = self.originString.split('\n')
+    def setFilePath (self, filePath):
+        fileDescriptor = open(filePath, mode='r', encoding='utf-8')
+        self.prepareData = fileDescriptor.readlines()
+        self.makePrepareData()
 
-        if self.isDebug == True:
+    def makePrepareData (self):
+        if self.prepareData.count == 1:
+            return
+        
+        newArray = []
+        for string in self.prepareData:
+            # remove fake data
+            if len(string) < 1:
+                continue
+            # remvoe fake data end
+
+            # 유니코드에 포함되는 특수문자의 경우 while 을 이용하여 내부 처리하는 로직이 필요.
+            string = string.lower()
+            string = string.replace('\n', '')
+            string = string.replace('ㆍ', '')
+            string = string.replace('‘', '')
+            string = string.replace('’', '')
+            string = string.replace('“', '')
+            string = string.replace('”', '')
+            parsedString = re.sub("""[-+=.,#/?:$'"}]""", '', string)
+
+            newArray.append(parsedString)
+
+        self.prepareData = newArray
+
+        # log
+        if self.isDebug:
             print('=' * 100)
             print('prepare data : ')
-            print(self.prepareData)
+            # print(self.prepareData)
             print('=' * 100)
 
-        spaceLocation = self.originString.find(' ')
+        self.clasifyString()
 
-
-        #remove dummy 
-        for tempString in self.prepareData:
-            if len(tempString) < 1:
-                self.prepareData.remove(tempString)
-        #remove dummy end
-
-
+    def clasifyString (self):
         categoryArray = []        
         for tempString in self.prepareData:
             firstSpaceLocation = tempString.find(' ')
@@ -57,10 +84,13 @@ class ssparser:
         if self.isDebug == True:
             print('=' * 100)
             print('sorted category : ') 
-            print(self.categoryArray)
+            print(len(self.categoryArray))
             print('=' * 100)
 
-    def getXData(self):
+        self.makeYData()
+        self.makeXData()
+
+    def makeXData(self):
         # Make String Array ["asdfasdf asdf asdfasdfasdf", ...]
         returnArray = []
         for tempString in self.prepareData:
@@ -70,16 +100,14 @@ class ssparser:
 
         self.xData = returnArray
 
+        # log
         if (self.isDebug == True):
             print('=' * 100)
-            print('sorted category : ') 
-            print(self.xData)
+            print('x data count : ')
+            print(len(self.xData))
             print('=' * 100)
 
-        return self.xData
-
-
-    def getYData(self):
+    def makeYData(self):
         # Make Category Index Array ex) [0, 0, 0, 1, 0, 0, 0, ...]
         returnArray = []
         for tempString in self.prepareData:
@@ -101,8 +129,13 @@ class ssparser:
                 i += 1
 
             returnArray.append(currentCategoryIndexArray)
-        
-            if self.isDebug:
-                print(currentCategoryIndexArray)
 
-        return returnArray
+
+        self.yData = returnArray
+
+        # log
+        if (self.isDebug == True):
+            print('=' * 100)
+            print ('y data count : ')
+            print (len(self.yData))
+            print('=' * 100)
