@@ -1,6 +1,7 @@
 from operator import eq
 import re
 import os
+import datetime
 
 class ssparser:
     def __init__(self):
@@ -12,14 +13,58 @@ class ssparser:
         self.dummyYData = []
         self.isDebug = False
 
+
     def loadDummyData (self):
         # TODO: 이전에 기록되어있던 yData 를 가져와 순차적으로 추가.
-        currentPath = os.getcwd()
+        if not os.path.exists('./output/dummy_last.txt'):
+            return
+
+        fileDescriptor = open('./output/dummy_last.txt', 'r', encoding='utf-8')
+        array = fileDescriptor.readlines()
+        
+        newCategory = []
+        for string in array:
+            string = string.replace('\n', '')
+            if len(string) > 1:
+                newCategory.append(string)
+        
+        self.categoryArray = newCategory
+
+
+    def writeDummyData (self):
+        fileDescriptor = open('./output/dummy_last.txt', 'w', encoding='utf-8')
+        writeFileString = ''
+        
+        for category in self.categoryArray:
+            writeFileString += '\n' + category
+        
+        fileDescriptor.write(writeFileString)
+        fileDescriptor.close()
+
+        now = datetime.datetime.now()
+        currentDate = now.strftime('%Y-%m-%d_%H:%M:%S')
+        dummyFilePath = './output/dummy_' + currentDate + '.txt'
+        fileDescriptor = open(dummyFilePath, 'w', encoding='utf-8')
+        fileDescriptor.write(writeFileString)
+        fileDescriptor.close
+
 
     def setFilePath (self, filePath):
+        # log
+        if self.isDebug == True:
+            print("=" * 100)
+            print("ssparser : set file path - " + filePath)
+
         fileDescriptor = open(filePath, mode='r', encoding='utf-8')
+
         self.prepareData = fileDescriptor.readlines()
         self.makePrepareData()
+
+    
+    def removeChar(self, originString, removalChar):
+        while originString.find(removalChar) > 0:
+            originString = originString.replace(removalChar, '')
+        return originString
 
     def makePrepareData (self):
         if self.prepareData.count == 1:
@@ -34,13 +79,30 @@ class ssparser:
 
             # 유니코드에 포함되는 특수문자의 경우 while 을 이용하여 내부 처리하는 로직이 필요.
             string = string.lower()
-            string = string.replace('\n', '')
-            string = string.replace('ㆍ', '')
-            string = string.replace('‘', '')
-            string = string.replace('’', '')
-            string = string.replace('“', '')
-            string = string.replace('”', '')
-            parsedString = re.sub("""[-+=.,#/?:$'"}]""", '', string)
+            string = self.removeChar(string, '\n')
+            string = self.removeChar(string, 'ㆍ')
+            string = self.removeChar(string, '‘')
+            string = self.removeChar(string, '’')
+            string = self.removeChar(string, '“')
+            string = self.removeChar(string, '”')
+            string = self.removeChar(string, '″')
+            string = self.removeChar(string, '…')
+            string = self.removeChar(string, '`')
+            string = self.removeChar(string, '·')
+            string = self.removeChar(string, '↑')
+            string = self.removeChar(string, '→')
+            string = self.removeChar(string, '↓')
+            string = self.removeChar(string, '!')
+            string = self.removeChar(string, '！')
+            string = self.removeChar(string, '[')
+            string = self.removeChar(string, ']')
+            string = self.removeChar(string, '&amp;')
+            string = self.removeChar(string, '&lt;')
+            string = self.removeChar(string, '&gt;')
+            string = self.removeChar(string, '″')
+            string = self.removeChar(string, '，')
+            parsedString = re.sub("""[()-+=.,#/?:$'"}]""", '', string)
+            parsedString = parsedString.lstrip()
 
             newArray.append(parsedString)
 
@@ -49,14 +111,18 @@ class ssparser:
         # log
         if self.isDebug:
             print('=' * 100)
-            print('prepare data : ')
-            # print(self.prepareData)
+            print('prepared data ready')
             print('=' * 100)
 
         self.clasifyString()
 
+
     def clasifyString (self):
-        categoryArray = []        
+        # TODO: load dummy data, 
+        categoryArray = []
+
+        self.loadDummyData()
+
         for tempString in self.prepareData:
             firstSpaceLocation = tempString.find(' ')
             currentCategoryString = tempString[0:firstSpaceLocation]
@@ -77,8 +143,8 @@ class ssparser:
                     categoryArray.append(currentCategoryString)
             # Find Category / Sort End
 
-    
         self.categoryArray = categoryArray
+        self.writeDummyData()
 
         #log
         if self.isDebug == True:
@@ -90,6 +156,39 @@ class ssparser:
         self.makeYData()
         self.makeXData()
 
+
+    def writeXData(self):
+        fileDescriptor = open('./output/xData.txt', 'w', encoding='utf-8')
+        writeFileString = ''
+        writeFileString = '\n'.join(self.xData)
+        fileDescriptor.write(writeFileString)
+        fileDescriptor.close()
+
+        # log
+        if self.isDebug:
+            print('=' * 100)
+            print('x Data Write Done')
+            print('=' * 100)
+
+
+    def writeYData(self):
+        fileDescriptor = open('./output/yData.txt', 'w', encoding='utf-8')
+        writeFileString = ''
+        for array in self.yData:
+            writeFileString += '['
+            seperator = ','
+            writeFileString += seperator.join(str(integer) for integer in array)
+            writeFileString += ']\n'
+        fileDescriptor.write(writeFileString)
+        fileDescriptor.close()
+        
+        # log
+        if self.isDebug:
+            print('=' * 100)
+            print('y Data Write Done')
+            print('=' * 100)
+
+
     def makeXData(self):
         # Make String Array ["asdfasdf asdf asdfasdfasdf", ...]
         returnArray = []
@@ -99,6 +198,7 @@ class ssparser:
             returnArray.append(currentString)
 
         self.xData = returnArray
+        self.writeXData()
 
         # log
         if (self.isDebug == True):
@@ -106,6 +206,7 @@ class ssparser:
             print('x data count : ')
             print(len(self.xData))
             print('=' * 100)
+
 
     def makeYData(self):
         # Make Category Index Array ex) [0, 0, 0, 1, 0, 0, 0, ...]
@@ -130,8 +231,8 @@ class ssparser:
 
             returnArray.append(currentCategoryIndexArray)
 
-
         self.yData = returnArray
+        self.writeYData()
 
         # log
         if (self.isDebug == True):
