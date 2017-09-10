@@ -1,8 +1,6 @@
 
 ssparser/__pycache__/ssparser.cpython-36.pyc
 
-*.txt
-
-*.pyc
+ssparser/ssparser.pyc
 
 ssparser/.vscode/settings.json
