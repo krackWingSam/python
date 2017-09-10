@@ -15,7 +15,7 @@ tokenizations = twitter.pos(input_text)
 
 aftertokenization = twitter.pos(input_text, norm=True)
 
-print('')
+print(' ')
 print('########    Twitter    ########')
 print('')
 print('normalization : ')
