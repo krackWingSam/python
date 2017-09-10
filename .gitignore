@@ -1,5 +1,6 @@
 
 ssparser/__pycache__/ssparser.cpython-36.pyc
+<<<<<<< HEAD
 
 <<<<<<< HEAD
 ssparser/ssparser.pyc
@@ -34,3 +35,5 @@ ssparser/.vscode/settings.json
 
 ssparser/ssparser.pyc
 >>>>>>> morpheme
+=======
+>>>>>>> origin/string_parser_for_cnn
