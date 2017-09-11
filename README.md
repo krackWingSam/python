@@ -15,3 +15,18 @@ A. vscode 환경에서 작업
    - vscode interpretor 설정 : cmd + shift + p -> interpreter
    - select python 3.x
    - 필요한 라이브러리는 pip를 이용하여 설치
+
+
+
+
+
+
+
+
+
+# 발생한 문제점들
+ 1. git을 이용하며 각각의 branch들을 merge 하는 경우 confilct 발생.
+  - .gitignore 파일은 공통으로 사용되므로 conflict가 발생할 확률이 높음.
+  - update for... 를 이용하거나 conflict가 난 부분을 삭제하고 commit, pull request 작성.
+  - 이후 master 에서 수정된 사항들을 commit 할것.
+  - master 에서 commit 된 부분을 update 하고 계속 사용.
