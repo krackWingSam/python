@@ -5,3 +5,5 @@ ssparser/ssparser.pyc
 
 ssparser/.vscode/settings.json
 *.txt
+
+ssparser/__pycache__/slsmaker.cpython-36.pyc
