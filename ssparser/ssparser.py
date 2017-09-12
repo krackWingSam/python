@@ -5,13 +5,14 @@ import datetime
 
 class ssparser:
     def __init__(self):
-        self.filePath = ''
-        self.prepareData = []
-        self.categoryArray = []
-        self.xData = []
-        self.yData = []
-        self.dummyYData = []
-        self.isDebug = False
+        self.filePath           = ''
+        self.prepareData        = []
+        self.categoryArray      = []
+        self.xData              = []
+        self.yData              = []
+        self.dummyYData         = []
+        self.isDebug            = False
+        self.writeExternalData  = False
 
 
     def loadDummyData (self):
@@ -37,7 +38,7 @@ class ssparser:
         
         for category in self.categoryArray:
             writeFileString += '\n' + category
-        
+        writeFileString.lstrip()
         fileDescriptor.write(writeFileString)
         fileDescriptor.close()
 
@@ -66,9 +67,15 @@ class ssparser:
             originString = originString.replace(removalChar, '')
         return originString
 
+
     def makePrepareData (self):
         if self.prepareData.count == 1:
             return
+
+        #log
+        if self.isDebug:
+            print('=' * 100)
+            print('start data prepare')
         
         newArray = []
         for string in self.prepareData:
@@ -77,32 +84,16 @@ class ssparser:
                 continue
             # remvoe fake data end
 
-            # 유니코드에 포함되는 특수문자의 경우 while 을 이용하여 내부 처리하는 로직이 필요.
+            # 정규표현식을 위한 구문
             string = string.lower()
-            string = self.removeChar(string, '\n')
-            string = self.removeChar(string, 'ㆍ')
-            string = self.removeChar(string, '‘')
-            string = self.removeChar(string, '’')
-            string = self.removeChar(string, '“')
-            string = self.removeChar(string, '”')
-            string = self.removeChar(string, '″')
-            string = self.removeChar(string, '…')
-            string = self.removeChar(string, '`')
-            string = self.removeChar(string, '·')
-            string = self.removeChar(string, '↑')
-            string = self.removeChar(string, '→')
-            string = self.removeChar(string, '↓')
-            string = self.removeChar(string, '!')
-            string = self.removeChar(string, '！')
-            string = self.removeChar(string, '[')
-            string = self.removeChar(string, ']')
-            string = self.removeChar(string, '&amp;')
-            string = self.removeChar(string, '&lt;')
-            string = self.removeChar(string, '&gt;')
-            string = self.removeChar(string, '″')
-            string = self.removeChar(string, '，')
-            parsedString = re.sub("""[()-+=.,#/?:$'"}]""", '', string)
+            han = re.compile(r'[ㄱ-ㅣ가-힣a-zA-Z/]+')
+            hanArray = re.findall(han, string)
+            parsedString = ''
+            for word in hanArray:
+                parsedString += word + ' '
             parsedString = parsedString.lstrip()
+            parsedString = parsedString.rstrip()
+            #
 
             newArray.append(parsedString)
 
@@ -110,7 +101,6 @@ class ssparser:
 
         # log
         if self.isDebug:
-            print('=' * 100)
             print('prepared data ready')
             print('=' * 100)
 
@@ -125,10 +115,8 @@ class ssparser:
 
         for tempString in self.prepareData:
             firstSpaceLocation = tempString.find(' ')
-            currentCategoryString = tempString[0:firstSpaceLocation]
-
-            firstSpaceLocation = tempString.find(' ')
-            currentCategoryString = tempString[0:firstSpaceLocation]
+            if firstSpaceLocation > -1:
+                currentCategoryString = tempString[0:firstSpaceLocation]
 
             # Find category / Sort
             if len(categoryArray) == 0:
@@ -153,8 +141,26 @@ class ssparser:
             print(len(self.categoryArray))
             print('=' * 100)
 
-        self.makeYData()
-        self.makeXData()
+        if self.writeExternalData:
+            self.makeYData()
+            self.makeXData()
+
+        self.writeOutputData()
+
+
+    def writeOutputData(self):
+        fileDescriptor = open('./output/data.txt', 'w', encoding='utf-8')
+        writeFileString = ''
+        writeFileString = '\n'.join(self.prepareData)
+        writeFileString.lstrip()
+        fileDescriptor.write(writeFileString)
+        fileDescriptor.close()
+
+        #log
+        if self.isDebug:
+            print('=' * 100)
+            print('data.txt Write Done')
+            print('=' * 100)
 
 
     def writeXData(self):
