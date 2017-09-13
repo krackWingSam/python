@@ -40,16 +40,17 @@ class slsmaker:
                 if isNew == True:
                     categoryArray.append(currentCategoryString)
                     titleArray.append([])
-                #category 분류 완료
+                # category 분류 완료
 
-                #카테고리를 삭제한 제목만을 갖는 스트링 생성
+                # 카테고리를 삭제한 제목만을 갖는 스트링 생성 - 쓸모없는 문자 삭제
                 parsedString = string.replace(replaceString, '')
+                parsedString = parsedString.replace('\n', '')
 
-                #삽입된 카테고리의 인덱스애 맞추어 wordArray 배열에 밀어넣기
+                # 삽입된 카테고리의 인덱스애 맞추어 titleArray 배열에 밀어넣기
                 index = categoryArray.index(currentCategoryString)
                 titleArray[index].append(parsedString)
-        #카테고리 분류 완료
-        #카테고리별 제목 배열 생성 완료
+        # 카테고리 분류 완료
+        # 카테고리별 제목 배열 생성 완료
 
         # log
         if self.isDebug == True:
@@ -59,13 +60,32 @@ class slsmaker:
 
         # log
         if self.isDebug == True:
-            print ('start : seperate each word array')
+            print ('start : separate each word array')
 
-        
+        # word array 생성
+        wordArray = []
+        for array in titleArray:
+            index = titleArray.index(array)
+            # log
+            if self.isDebug == True:
+                print('\tstart stack words : ', index)
+            wordArray.append([])
+            for title in array:
+                tempWordArray = title.split(' ')
+                for word in tempWordArray:
+                    isNew = True
+                    if word in wordArray[index]:
+                        isNew = False
+                    if isNew == True:
+                        wordArray[index].append(word)
+            # log
+            if self.isDebug == True:
+                print('\tend stack words : ', index)
+        # word Array 생성 완료
 
         # log
         if self.isDebug == True:
-            print ('done : seperate each word array')
+            print ('done : separate each word array')
 
         # log
         if self.isDebug == True:
